@@ -3,7 +3,7 @@ services:
   - docker
 before_install:
   - curl -O https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
-  - sudo unzip terraform_0.11.10_linux_amd64.zip -d /usr/local/bin/
+  - sudo unzip terraform_0.12.18_linux_amd64.zip -d /usr/local/bin/
   - rm terraform_0.11.10_linux_amd64.zip
   - sudo chmod +x /usr/local/bin/terraform
   - pip install ansible --user
