@@ -129,3 +129,18 @@
   - name: to add node into kubernetes cluster
     shell: "bash {{ansible_user_dir}}/token.sh"
     when: ansible_hostname == "node"
+  - name: node add execution take some few seconds
+    pause:
+      minutes: 2
+  - name: deployment file move to master server 
+    copy:
+      src: ./k8s/{{item}}
+      dest: "{{ansible_user_dir}}/"
+      remote_src: no
+    when: ansible_hostname == "master"
+    loop:
+      - node-server.yml
+      - redis-server.yml
+  - name: deployment file execute to master server
+    shell: kubectl apply -f node-server.yml -f node-server.yml
+    when: ansible_hostname == "master"

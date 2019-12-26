@@ -8,9 +8,12 @@ before_install:
   - sudo chmod +x /usr/local/bin/terraform
   - pip install ansible --user
   - chmod 0400 key/auth_key
+  - echo "$docker_password" | docker login -u "$docker_username" --password-stdin
+  - docker build -t jjino/node-test -f ./image/Dockerfile ./image
 script:
   - terraform --version
   - ansible --version
+  - docker push jjino/node-test:latest
   - terraform init
   - terraform apply -auto-approve
   - sleep 300
