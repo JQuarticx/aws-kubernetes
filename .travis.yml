@@ -11,3 +11,4 @@ script:
   - terraform --version
   - ansible --version
   - ansible localhost -m ping
+  - terraform init
