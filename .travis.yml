@@ -9,6 +9,7 @@ before_install:
   - pip install ansible --user
 script:
   - terraform --version
+  - pwd
   - ansible --version
   - ansible localhost -m ping
   - terraform init
