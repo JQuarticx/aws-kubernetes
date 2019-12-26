@@ -16,5 +16,5 @@ script:
   - docker push jjino/node-test:latest
   - terraform init
   - terraform apply -auto-approve
-  - sleep 300
+  - sleep 301
   - terraform destroy -auto-approve
