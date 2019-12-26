@@ -9,7 +9,7 @@ before_install:
   - pip install ansible --user
   - chmod 0400 key/auth_key
   - echo "$docker_password" | docker login -u "$docker_username" --password-stdin
-  - docker build -t jjino/node-test -f ./image/Dockerfile ./image
+  - docker build -t jjino/node-test -f ./images/Dockerfile ./images
 script:
   - terraform --version
   - ansible --version
