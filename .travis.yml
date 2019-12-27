@@ -14,11 +14,11 @@ before_install:
 - pip install ansible --user
 - chmod 0400 key/auth_key
 - echo "$docker_password" | docker login -u "$docker_username" --password-stdin
-- docker build -t "$docker_registry_name"/node-test -f ./images/Dockerfile ./images
+- docker build -t "$docker_registry_name"/appserver -f ./images/Dockerfile ./images
 script:
 - terraform --version
 - ansible --version
-- docker push "$docker_registry_name"/node-test:latest
+- docker push "$docker_registry_name"/appserver:latest
 - terraform init
 - terraform apply -auto-approve
 - sleep 300

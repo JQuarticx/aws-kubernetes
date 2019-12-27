@@ -139,8 +139,7 @@
       remote_src: no
     when: ansible_hostname == "master"
     loop:
-      - node-server.yml
-      - redis-server.yml
+      - app-server.yml
   - name: deployment file execute to master server
-    shell: kubectl apply -f node-server.yml -f redis-server.yml
+    shell: kubectl apply -f app-server.yml
     when: ansible_hostname == "master"
