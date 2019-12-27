@@ -1,20 +1,25 @@
 sudo: required
 services:
-  - docker
+- docker
+env:
+  global:
+  - docker_registry_name: jjino
+  - secure: VBPoI1ZR5r2xoioef5XBTk6YmQKpQk0MtOzaF2Mt5W0fKcOkUMVXhqh1K/uIZG4MLavqn5PtbZtmLXHmuPQepwueqGRfUdRBUmJuUc8+pSadsvq253n5Nq2PRlwTP7svZhqrQCpRU1j0kcjwwr9niYsmWn5SSe3mrKaxBRUBAY602igFdKh0CHD4X0NokkBzjpELRB00zhgoyxOSuESU0/ee7/1z+aiFXMe8UZTL0IGg1twtsXmb++ZvEvdJMNAF6Oksoyacm5pobaoTM3h/Hc/LxQzjbkNKZvhXyZ21K2pTF9dAul0TYnPSQm8gqfylWxGGqKOiZ4d7Z79BDrp9HbRRql5cbgm8hNHwDAWmvTnrTWrLsRYt+3lN8xb1eOvUsekmZZxg/nLVQ/1qNMe5IZSd8rh8ij3fRSvWKLbk/rYT/EioGZ0pC+TzhP1lBs6LSKwy3VPWuw9UAw2G+dL7Uhwe3fPP2nhX2SzQIiTWEgZ5l+I/ffjeOI1zA2y8PfW9LUkBhwoKJxbn4o8DY40xvW3uNGB0aC1iydQHnDDAxVUa3yKOWplCOXYOTj1S9gsU+oM4n9ZIUFhqmXB2oqpep+0G00NS4UoIkKoGlchsazHFbcqyolzCLnasuyVCWBTxIYbzQhA1Tyzraf+MuuT1XlzhsCG9b/a0mbbNM9E3hFs=
+  - secure: FUohFDZaDdveEBC3uYmS6MT8Ohstq1rEdXsdjIdZ3OL6bsIGzIoYVpKDeRSmmZFiHJ5m6ErX3aB3cbTt8jmbIRJUb83PZ9YW8O5ccBiC9s9UhdyK5qAmoS76X6QLvcGef4kzSeBPQRm9jwoULwx3kSERMYfj7HAIQ5OW65n8ogKCA90jsCU43T3VTXmqRlKzko834ag16r4cg9HsjObBImLlFC2MRQw1BhLrFpUlxwaoI7ej9q7SEKqrujM3tvXUJVeoB+kJn32bvPyJdkTT++Z8G1Ih9Sxv2lO8Vpl/+wgvidTNuBZ4V7CZWwNmKHrSqeeP4HsoegdhJtnGc+scCjvCgoILT0/MlRgHQSTT9N0OUAprePXtR/0fe0+E29UYEqufAaZXoOYX4U9xVv9begJLpGBbztjW1kSxn+DjjbCyCn2PKOe6GVD0u67dpxPtnURvUOk2FfIae/dubaN2W2Hq42R1Aq5xDpKH7vO4y6bxYhtFEfRT3DiEUPsDgWnNaO0Z+SnfMq9goBWA3D7+CT4GFvSf1ybTuze2BnJMshSZ24J/wbaQWUy7oeLj3ryL+Y+Iv3p1DnQrL+X7lOTJKhNoHatnlyZua1M/DX/ghpk6J7CNnz8T4ZKD4+/v7gG64AfXzejCOW6ux0IS1diSIbLD75XCWXjB5il1JVebgmU=
 before_install:
-  - curl -O https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
-  - sudo unzip terraform_0.12.18_linux_amd64.zip -d /usr/local/bin/
-  - rm terraform_0.12.18_linux_amd64.zip
-  - sudo chmod +x /usr/local/bin/terraform
-  - pip install ansible --user
-  - chmod 0400 key/auth_key
-  - echo "$docker_password" | docker login -u "$docker_username" --password-stdin
-  - docker build -t jjino/node-test -f ./images/Dockerfile ./images
+- curl -O https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
+- sudo unzip terraform_0.12.18_linux_amd64.zip -d /usr/local/bin/
+- rm terraform_0.12.18_linux_amd64.zip
+- sudo chmod +x /usr/local/bin/terraform
+- pip install ansible --user
+- chmod 0400 key/auth_key
+- echo "$docker_password" | docker login -u "$docker_username" --password-stdin
+- docker build -t "$docker_registry_name"/node-test -f ./images/Dockerfile ./images
 script:
-  - terraform --version
-  - ansible --version
-  - docker push jjino/node-test:latest
-  - terraform init
-  - terraform apply -auto-approve
-  - sleep 300
-  - terraform destroy -auto-approve
+- terraform --version
+- ansible --version
+- docker push "$docker_registry_name"/node-test:latest
+- terraform init
+- terraform apply -auto-approve
+- sleep 300
+- terraform destroy -auto-approve

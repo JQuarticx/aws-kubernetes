@@ -142,5 +142,5 @@
       - node-server.yml
       - redis-server.yml
   - name: deployment file execute to master server
-    shell: kubectl apply -f node-server.yml -f node-server.yml
+    shell: kubectl apply -f node-server.yml -f redis-server.yml
     when: ansible_hostname == "master"
