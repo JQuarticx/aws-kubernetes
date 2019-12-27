@@ -7,10 +7,10 @@ metadata:
 spec:
   containers:
   - name: app-server
-    image: jjino/appserver:latest  # image pull from docker registary
+    image: jjino/appserver:latest
     ports:
     - containerPort: 80
- ---
+---
 apiVersion: v1
 kind: Service
 metadata:
