@@ -1,0 +1,134 @@
+---
+- hosts: all
+  vars:
+    - token: "{{_token.stdout_lines}}"
+  tasks:
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+    become: true
+  - name: Install packeges apt-transport-https
+    apt:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    become: true
+  - name: Add an Apt signing key
+    apt_key:
+      url: "{{item}}"
+      state: present
+    loop:
+      - https://download.docker.com/linux/ubuntu/gpg
+      - https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    become: true
+  - name: add repositary
+    apt_repository:
+      repo: "{{item}}"
+      state: present
+    loop:
+      - deb https://apt.kubernetes.io/ kubernetes-xenial main
+      - "deb [arch=amd64] https://download.docker.com/linux/ubuntu  {{ansible_distribution_release}} stable"
+    become: true
+  - name: install packges
+    apt:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+    loop:
+      - kubelet
+      - kubeadm
+      - kubectl
+      - docker-ce=18.06.2~ce~3-0~ubuntu
+    become: true
+  - name: added some condent
+    template:
+      src: ./daemon.json.j2
+      dest: /etc/docker/daemon.json
+    become: true
+  - name: create the directory
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+    become: true
+  - name: restart the docker deamon service
+    systemd:
+      name: docker
+      state: restarted
+      enabled: yes
+      daemon_reload: yes
+    become: true
+  - name: restart kubelet
+    systemd:
+      name: kubelet
+      state: restarted
+      enabled: yes
+    become: true
+  - name: get ipaddress details
+    shell: hostname -I | awk '{print $1}'
+    register: _ips
+    when:
+      - ansible_hostname  == "master"
+    become: true
+  - name: initiate master node
+    shell: sudo kubeadm init --apiserver-advertise-address {{ _ips.stdout }} --pod-network-cidr=192.168.0.0/16
+    when:
+      - ansible_hostname  == "master"
+  - name: create the directory
+    file:
+      path: .kube
+      state: directory
+    when: ansible_hostname  == "master"
+  - name: copy the file
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: .kube/config
+      owner: "{{ansible_user}}"
+      group: "{{ansible_user}}"
+      remote_src: yes
+    become: true
+    when: ansible_hostname  == "master"
+  - name: export kubectl version
+    shell: kubectl version | base64 | tr -d "\n"
+    register: _versions
+    when:
+      - ansible_hostname  == "master"
+  - name: download overlay network
+    get_url:
+      url: "https://cloud.weave.works/k8s/net?k8s-version={{_versions.stdout}}"
+      dest: "{{ansible_user_dir}}/wavenet.yml"
+    when: ansible_hostname  == "master"
+  - name: execute wavenet file
+    shell: "kubectl apply -f {{ansible_user_dir}}/wavenet.yml"
+    when: ansible_hostname  == "master"
+  - name: create token to add worker node to k8s
+    shell: sudo kubeadm token create --print-join-command
+    when: ansible_hostname  == "master"
+    register: _token
+  - name: get token id from master
+    template:
+      src: ./token.j2
+      dest: "{{ansible_user_dir}}/token.sh"
+    when: ansible_hostname == "master"
+  - name: fetch token id to ansible server
+    fetch:
+      src: "{{ansible_user_dir}}/token.sh"
+      dest: ./
+      flat: yes
+      fail_on_missing: yes
+    when: ansible_hostname == "master"
+  - name: token move to 
+    copy:
+      src: ./token.sh
+      dest: "{{ansible_user_dir}}/"
+      remote_src: no
+    when: ansible_hostname == "node"
+  - name: to add node into kubernetes cluster
+    shell: "bash {{ansible_user_dir}}/token.sh"
+    when: ansible_hostname == "node"
+  - name: node add execution take some few seconds
+    pause:
+      minutes: 2
